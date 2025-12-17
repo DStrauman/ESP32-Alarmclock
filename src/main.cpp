@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
+//Project: ESP32-Alarmclock
+//Version: Pre-Alpha (Not tested)
 
 int myFunction(int, int);
 void WiFiHeath();
@@ -13,15 +15,21 @@ void setup() {
   pinMode(1, OUTPUT); //SDA DISPLAY PIN
   Serial.begin(115200);
 }
-
+String WiFiSSID = "SSID"; //WiFi SSID
+String WiFiPassword = "Pass"; //WiFi Password
+int alarmTime = 650; //Alarm time in HHMM format
 void loop() {
+  String timeZone = "PST8PDT,M3.2.0,M11.1.0"; //Set timezone to PST
+  setenv("TZ", timeZone.c_str(), 1);
   bool alarmOff = false;
   WiFiHealth();
   struct tm timeinfo;
   if(!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
+    WiFiHealth();
     return;
   }
+
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
   int currentTime = timeinfo.tm_hour * 100 + timeinfo.tm_min;
   if (digitalRead(5) == HIGH) { //check for button press on pin 5
@@ -39,23 +47,29 @@ void loop() {
     Serial.println("No alarm condition met.");
   }
 
-  if(currentTime >= 0650 && !alarmOff) {
+  if(currentTime >= alarmTime && !alarmOff) {
     alarmActivate();
   }
   delay(1000);
 }
 
 void alarmActivate() { //Alarm function
-  Serial.println("Alarm Activated!");
-  digitalWrite(4, HIGH); // Activate alarm
-  delay(5000); // Alarm duration
+  while (digitalRead(5) != HIGH) //Blinks LED and Buzzer untill button is pressed
+  {
+    digitalWrite(4, HIGH);
+    digitalWrite(5, HIGH);
+    delay(100);
+    digitalWrite(4, LOW);
+    digitalWrite(5, LOW);
+  }
+  
 }
 
 void WiFiHealth(){ //Checks wifi status and attemps reconnect
   if(WiFi.status() != WL_CONNECTED){
-    Serial.println("WiFi disabled, attempting connection.");
+    Serial.println("WiFi disconnected, attempting connection.");
     int attempts;
-    WiFi.begin("SSID", "Pass"); //Connect to WiFi
+    WiFi.begin(WiFiSSID.c_str(), WiFiPassword.c_str()); //Connect to WiFi
     while (WiFi.status() != WL_CONNECTED || attempts < 15) {
       delay(500);
       attempts++;
