@@ -17,53 +17,57 @@ void setup() {
   Serial.begin(115200);
 }
 
+bool alarmOff = false;
 String WiFiSSID = "SSID"; //WiFi SSID
-String WiFiPassword = "Pass"; //WiFi Password
-int alarmTime = 650; //Alarm time in HHMM format
+String WiFiPassword = "PASSWORD"; //WiFi Password
+int alarmTime = 0650; //Alarm time in HHMM format
 void loop() {
   String timeZone = "PST8PDT,M3.2.0,M11.1.0"; //Set timezone to PST
   setenv("TZ", timeZone.c_str(), 1);
-  bool alarmOff = false;
   struct tm timeinfo;
-  if(!getLocalTime(&timeinfo)){
-    Serial.println("Failed to obtain time");
-    WiFiHealth();
-    return;
-  }
+  WiFiHealth(); //Check WiFi status
 
+  configTime(3600, 3600, "pool.ntp.org");
+   // configTime already called, get updated time
+    if(!getLocalTime(&timeinfo)){
+      Serial.println("Failed to obtain updated time");
+    }
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-  int currentTime = timeinfo.tm_hour * 100 + timeinfo.tm_min;
-  if (digitalRead(5) == HIGH) { //check for button press on pin 5
-    Serial.println("Pin 5 is HIGH");
-    alarmOff = true;
-  } else {
-    Serial.println("Pin 5 is LOW");
-  }
+  int currentTime = timeinfo.tm_hour * 100 + timeinfo.tm_min; //Convert time to HHMM format for easy comparison
+  Serial.print("Current Time (HHMM): ");
+  Serial.println(currentTime);
 
   if (currentTime == 0000 && alarmOff) { //checks if time is 12AM, if it is it will turn on the alarm
     Serial.println("It's noon and alarm is not off!");
     Serial.println("Setting alarm!");
     alarmOff = false; // prevent multiple alarms
   } else {
-    Serial.println("No alarm condition met.");
+    Serial.println("No alarm set.");
   }
 
   if(currentTime >= alarmTime && !alarmOff) {
+    Serial.println("Alarm Time Reached!");
+    Serial.println(currentTime);
     alarmActivate();
   }
-  delay(1000);
+  Serial.print("Current alarmstatus: ");
+  delay(993);
 }
 
 void alarmActivate() { //Alarm function
+  Serial.println("Alarm Activated!");
   while (digitalRead(5) != HIGH) //Blinks LED and Buzzer untill button is pressed
   {
     digitalWrite(4, HIGH);
     digitalWrite(5, HIGH);
-    delay(100);
+    delay(500);
     digitalWrite(4, LOW);
     digitalWrite(5, LOW);
+    delay(500);
   }
-  
+  alarmOff = true; //Sets alarm off when button is pressed
+  Serial.println("Alarm Deactivated!");
+  return;
 }
 
 void WiFiHealth(){ //Checks wifi status and attemps reconnect
