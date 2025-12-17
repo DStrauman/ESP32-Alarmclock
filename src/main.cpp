@@ -5,7 +5,7 @@
 //Version: Pre-Alpha (Not tested)
 
 int myFunction(int, int);
-void WiFiHeath();
+void WiFiHealth();
 void alarmActivate();
 void setup() {
   int result = myFunction(2, 3);
@@ -16,6 +16,7 @@ void setup() {
   pinMode(1, OUTPUT); //SDA DISPLAY PIN
   Serial.begin(115200);
 }
+
 String WiFiSSID = "SSID"; //WiFi SSID
 String WiFiPassword = "Pass"; //WiFi Password
 int alarmTime = 650; //Alarm time in HHMM format
@@ -23,7 +24,6 @@ void loop() {
   String timeZone = "PST8PDT,M3.2.0,M11.1.0"; //Set timezone to PST
   setenv("TZ", timeZone.c_str(), 1);
   bool alarmOff = false;
-  WiFiHealth();
   struct tm timeinfo;
   if(!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
@@ -69,9 +69,9 @@ void alarmActivate() { //Alarm function
 void WiFiHealth(){ //Checks wifi status and attemps reconnect
   if(WiFi.status() != WL_CONNECTED){
     Serial.println("WiFi disconnected, attempting connection.");
-    int attempts;
+    int attempts = 0;
     WiFi.begin(WiFiSSID.c_str(), WiFiPassword.c_str()); //Connect to WiFi
-    while (WiFi.status() != WL_CONNECTED || attempts < 15) {
+    while (WiFi.status() != WL_CONNECTED && attempts < 15) {
       delay(500);
       attempts++;
       Serial.print(".");
@@ -86,6 +86,7 @@ void WiFiHealth(){ //Checks wifi status and attemps reconnect
     Serial.println("WiFi OK!");
   }
 }
+
 
 // put function definitions here:
 int myFunction(int x, int y) {
