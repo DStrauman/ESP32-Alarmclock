@@ -6,6 +6,7 @@
 
 int myFunction(int, int);
 void WiFiHeath();
+void alarmActivate();
 void setup() {
   int result = myFunction(2, 3);
   pinMode(5, INPUT); //set alarm/snooze pin
