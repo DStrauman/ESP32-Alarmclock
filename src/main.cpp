@@ -24,14 +24,14 @@ void loop() {
   }
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
   int currentTime = timeinfo.tm_hour * 100 + timeinfo.tm_min;
-  if (digitalRead(5) == HIGH) {
+  if (digitalRead(5) == HIGH) { //check for button press on pin 5
     Serial.println("Pin 5 is HIGH");
     alarmOff = true;
   } else {
     Serial.println("Pin 5 is LOW");
   }
 
-  if (currentTime == 0000 && alarmOff) {
+  if (currentTime == 0000 && alarmOff) { //checks if time is 12AM, if it is it will turn on the alarm
     Serial.println("It's noon and alarm is not off!");
     Serial.println("Setting alarm!");
     alarmOff = false; // prevent multiple alarms
@@ -45,13 +45,13 @@ void loop() {
   delay(1000);
 }
 
-void alarmActivate() {
+void alarmActivate() { //Alarm function
   Serial.println("Alarm Activated!");
   digitalWrite(4, HIGH); // Activate alarm
   delay(5000); // Alarm duration
 }
 
-void WiFiHealth(){
+void WiFiHealth(){ //Checks wifi status and attemps reconnect
   if(WiFi.status() != WL_CONNECTED){
     Serial.println("WiFi disabled, attempting connection.");
     int attempts;
